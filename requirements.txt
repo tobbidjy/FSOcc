@@ -1,0 +1,204 @@
+# TPVFormer的环境配置流程
+# 官方推荐版本
+mmcv-full==1.4.0
+mmdet==2.14.0
+mmdet3d==0.18.1
+mmsegmentation==0.14.1
+numba==0.48.0
+numpy==1.23.1
+Pillow==9.3.0
+PyYAML==6.0
+timm==0.4.12
+torch==1.10.0 # 对应cuda10.2/11.3
+-----------------------------------------------------------------------------------------------------------------------
+# 个人配置TPVFormer环境步骤，visualization/vis_frame.py、vis_scene.py、generate_videos.py运行成功
+
+# 先安装cuda11.3并切换
+wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda_11.3.0_465.19.01_linux.run
+sudo sh cuda_11.3.0_465.19.01_linux.run
+# 在.bashrc里切换cuda为11.3
+export PATH=/usr/local/cuda-11.3/bin${PATH:+:${PATH}}
+export C_INCLUDE_PATH=/usr/local/cuda-11.3/include:${C_INCLUDE_PATH}
+export LD_LIBRARY_PATH=/usr/local/cuda-11.3/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export PKG_CONFIG_PATH=/usr/local/cuda-11.3/pkgconfig:${PKG_CONFIG_PATH}
+
+# 添加环境变量，不然之后会报错
+export CUDA_LAUNCH_BLOCKING=1 # TPVFormer的debug
+
+# 创建环境TPVFormer
+conda create -n TPVFormer python==3.8
+
+# 失败尝试，跳过
+# 安装torch1.11.0
+# pip install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118 
+# pip install torch==1.10.0+cu102 torchvision==0.11.0+cu102 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
+# pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 -f https://download.pytorch.org/whl/torch_stable.html
+# conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=11.3 -c pytorch -c conda-forge
+# pip install torch==1.10.0+cu102 torchvision==0.11.0+cu102 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+# 离线安装pytorch等 https://download.pytorch.org/whl/torch_stable.html
+# 在上述网址找到对应版本下载离线安装包，对应cuda113,python=3.8以及linux
+pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 
+
+# 安装cuda113对应的cudatoolkit
+conda install cudatoolkit=11.3
+
+# 失败尝试，跳过
+# pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
+# 离线安装mmcv-full，从此找到合适的版本https://download.openmmlab.com/mmcv/dist/cu102/torch1.10.0/index.html
+# TORCH_CUDA_ARCH_LIST=8.6 pip install mmcv_full-1.4.0-cp38-cp38-manylinux1_x86_64.whl
+# pip install mmcv_full-1.4.0-cp38-cp38-manylinux1_x86_64.whl 
+
+# 安装mmcv-full，8.6为本地显卡RTX3070对应的算力，其余显卡上csdn搜索
+TORCH_CUDA_ARCH_LIST=8.6 pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
+
+# 安装其他module
+pip install mmdet==2.14.0
+# pip install mmdet3d==0.18.1 # 安装失败
+pip install mmdet3d==1.4.0
+pip install mmsegmentation==0.14.1
+pip install numba==0.48.0 numpy==1.23.1 Pillow==9.3.0 PyYAML==6.0 timm==0.4.12
+
+# 
+pip install yapf==0.40.1
+# 可视化需要安装
+pip install pyvirtualdisplay==3.0 mayavi==4.8.1 PyQt5==5.15.7
+# 可视化场景需要安装
+sudo apt-get install xvfb
+pip install xvfbwrapper
+
+pip install opencv-python==4.6.0.66
+pip install opencv-python-headless
+
+
+# 环境配置结束，历时20240406-20240423，特此记录
+
+-----------------------------------------------------------------------------------------------------------------------
+
+# SurroundOcc环境官方配置流程
+# Step-by-step installation instructions
+Following https://mmdetection3d.readthedocs.io/en/latest/getting_started.html#installation
+
+**1. Create a conda virtual environment and activate it.**
+```shell
+conda create -n surroundocc python=3.7 -y
+conda activate surroundocc
+```
+
+**2. Install PyTorch and torchvision (tested on torch==1.10.1 & cuda=11.1).**
+```shell
+pip install torch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1
+```
+
+**3. Install gcc>=5 in conda env.**
+```shell
+conda install -c omgarcia gcc-6 # gcc-6.2
+```
+
+**4. Install MMCV following the [official instructions](https://github.com/open-mmlab/mmcv).**
+```shell
+pip install mmcv-full==1.4.0
+```
+
+**5. Install mmdet and mmseg.**
+```shell
+pip install mmdet==2.14.0
+pip install mmsegmentation==0.14.1
+```
+
+**6. Install mmdet3d from source code.**
+```shell
+git clone https://github.com/open-mmlab/mmdetection3d.git
+cd mmdetection3d
+git checkout v0.17.1 # Other versions may not be compatible.
+# git checkout v1.4.0
+python setup.py install
+```
+
+**7. Install other dependencies.**
+```shell
+pip install timm
+pip install open3d-python
+```
+
+**8. Install Chamfer Distance.**
+```shell
+cd extensions/chamfer_dist
+python setup.py install --user
+# pip install trimesh==2.35.39
+
+```
+
+**9. Prepare pretrained models.**
+```shell
+cd SurroundOcc 
+mkdir ckpts
+
+cd ckpts & wget https://github.com/zhiqi-li/storage/releases/download/v1.0/r101_dcn_fcos3d_pretrain.pth
+```
+
+----------------------------------------------------------------------------------------------------------------------------
+# 个人配置SurroundOcc环境步，tools/dist_test.sh、tools/visual.py运行成功
+
+# 在TPVFormer切换的cuda11.3上配
+# 先安装cuda11.3并切换
+wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda_11.3.0_465.19.01_linux.run
+sudo sh cuda_11.3.0_465.19.01_linux.run
+# 在.bashrc里切换cuda为11.3
+export PATH=/usr/local/cuda-11.3/bin${PATH:+:${PATH}}
+export C_INCLUDE_PATH=/usr/local/cuda-11.3/include:${C_INCLUDE_PATH}
+export LD_LIBRARY_PATH=/usr/local/cuda-11.3/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export PKG_CONFIG_PATH=/usr/local/cuda-11.3/pkgconfig:${PKG_CONFIG_PATH}
+# 添加环境变量，不然之后会报错
+export CUDA_LAUNCH_BLOCKING=1 # TPVFormer的debug
+# 安装cuda113对应的cudatoolkit
+conda install cudatoolkit=11.3
+
+# 创建环境surroundocc并激活
+conda create -n surroundocc python=3.7 -y
+conda activate surroundocc
+
+# 离线安装pytorch等 https://download.pytorch.org/whl/torch_stable.html
+# 在上述网址找到对应版本下载离线安装包，对应cuda113,python=3.7以及linux
+torch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1
+# 并 pip install 安装
+
+# 安装gcc-6.2
+conda install -c omgarcia gcc-6.2
+
+# 安装mmcv-full，8.6为本地显卡RTX3070对应的算力，其余显卡上csdn搜索 4090为8.9
+TORCH_CUDA_ARCH_LIST=8.6 pip install mmcv-full==1.4.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10/index.html
+
+# 安装mmdet与mmsegmentation
+pip install mmdet==2.14.0
+pip install mmsegmentation==0.14.1
+
+# 安装mmdet3d==0.17.1
+# pip install mmdet3d==0.17.1 # 直接pip安装失败
+# 源码安装
+git clone https://github.com/open-mmlab/mmdetection3d.git
+cd mmdetection3d
+git checkout v0.17.1 # Other versions may not be compatible.
+# python setup.py install # 失败
+pip install -e .
+
+# 安装其他module
+# pip install numba==0.48.0 numpy==1.19.5 Pillow==9.5.0 PyYAML==6.0.1 timm==0.4.12
+pip install timm==0.4.12
+pip install yapf==0.40.1
+pip install setuptools==59.5.0
+# 可视化需要安装
+pip install pyvirtualdisplay==3.0 mayavi==4.8.1 PyQt5==5.15.7
+# 可视化场景需要安装
+sudo apt-get install xvfb
+pip install xvfbwrapper
+pip install opencv-python==4.6.0.66
+pip install opencv-python-headless==4.6.0.66
+
+# 安装倒角距离 chamfer==2.0.0
+cd ..
+cd extensions/chamfer_dist
+python setup.py install --user
+
+# 下载预训练权重
+wget https://github.com/zhiqi-li/storage/releases/download/v1.0/r101_dcn_fcos3d_pretrain.pth
